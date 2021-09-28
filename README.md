@@ -7,7 +7,7 @@ Overview:
     3. We will create an sql instance, database and user.  
     4. We will create secrets using secret manager.
     5. We will use cloud build to run migrations and deploy to cloud run.
- ~~We will create source repo and add trigger to run build on each commit~ ~ 
+  <strike>6. We will create source repo and add trigger to run build on each commit</strike>
     
 
 ## Prerequisite  
