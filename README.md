@@ -7,7 +7,8 @@ Overview:
     3. We will create an sql instance, database and user.  
     4. We will create secrets using secret manager.
     5. We will use cloud build to run migrations and deploy to cloud run.
-    6. ~~We will create source repo and add trigger to run build on each commit~~. 
+    6. ~We will create source repo and add trigger to run build on each commit~  
+    
 
 ## Prerequisite  
 1. Access to GCP account with permissions to create a project with billing and to enable API's.  
