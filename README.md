@@ -17,22 +17,21 @@ Overview:
 
 ## Resources
 
-| Resources                   	| Details 	|
-|-----------------------------	|---------	|
-| SQL Instance                	| SQL instance and single database will be used by wagtail website        	|
-| Storage Bucket              	|         	|
-| Google Container Repository 	| Image built will be pushed to gcr.io and used by cloud run for deployment         	|
-| Cloud Run                   	|         	|
-| Cloud Build                 	|         	|
-| Cloud Build Service Account   | This account is automaticaly created while enabling cloud build api(see API's table) <br> default service account is PROJECT_NUMBER@cloudbuild.gserviceaccount.com       	|
-| Cloud Run Service Account                 	| Cloud Run uses compute engine service account by default <br> default service account is PROJECT_NUMBER-compute@developer.gserviceaccount.com         	|
-| application_settings                 	| Secret created using secret manager      	|
-| admin_password                 	| Secret created using secret manager       	|
-| wagtail-cloudrun                 	| Container Image to be created and pushed to gcr.io/PROJECT_ID/wagtail-cloudrun by cloud build |
-| roles/secretmanager.secretAccessor  | on application_settings secret, assigned to cloud build and cloud run service accounts,<br> on admin_password assigned to cloud build        	|
-| roles/cloudsql.client           | required by cloud build service account        	|
-| roles/run.admin                 | required by cloud build service account       	|
-| roles/iam.serviceAccountUser    | required by cloud build service account        	|
+| Resources                   	| Resource Name 	| Details 	|
+|-----------------------------	|---------	|---------	|
+| SQL Instance                	| SQL_INSTANCE_NAME        	| SQL instance and single database will be used by wagtail website <br> Intialize SQL_INSTANCE_ID variable with unique sql intance name with in project        	|
+| Storage Bucket              	| BUCKET_NAME        	| Initialize GS_BUCKET_NAME variable with recommended value "${PROJECT_ID}-media" but you can choose whichever name you want        	|
+| Google Container Image 	| IMAGE_NAME        	| Assign Image name with tag like myimage:v1 or only name like myimage to be built and pushed to repository         	|
+| Cloud Run Service                  	| SERVICE_NAME     | Assign a name to service        	|
+| Cloud Build                 	|         	|         	|
+| Cloud Build Service Account   | CLOUDBUILD        	| This account is automaticaly created while enabling cloud build api(see API's table) <br> default service account is PROJECT_NUMBER@cloudbuild.gserviceaccount.com      	|
+| Cloud Run Service Account     | CLOUDRUN        	| Cloud Run uses compute engine service account by default <br> default service account is PROJECT_NUMBER-compute@developer.gserviceaccount.com         	|
+| Secret                        | APPLICATION_SECRET_NAME        	| use within project unique secret name to be created and used by CLOUDBUILD and CLOUDRUN resources      	|
+| Secret                        | PASSWORD_SECRET_NAME        	| Secret created using secret manager       	|
+| roles/secretmanager.secretAccessor  |         	| on APPICATION_SECRET_NAME secret, assigned to cloud build and cloud run service accounts,<br> on PASSWORD_SECRET_NAME assigned to cloud build        	|
+| roles/cloudsql.client           |         	| required by cloud build service account        	|
+| roles/run.admin                 |         	| required by cloud build service account       	|
+| roles/iam.serviceAccountUser    |         	| required by cloud build service account        	|
 
 ## Varialbes
 List of Variables created and used in scritps are:
@@ -60,6 +59,7 @@ We will need following apis to perfrom deplpoyment.
 | Cloud Source Repo 	| sourcerepo.googleapis.com    	|         	|
 
 ## Deploying Wagtail on Cloud Run  
+#### *FOR DEPLOYING WITH DEFAULT RESOURCE NAMES, EXECUTE .sh SCRIPTS (IT MAY CAUSE CONFLICT IN RESOURCE NAMES), FOR DEPLOYMENT WITH CUSTOM RESOURCE NAMES RUN THE COMMANDS MENTIONED (EXCEPT source ./\*.sh)*  
 ## 1. Configure Project  
 If you are using cloud sdk in local machine then run:
 ```
@@ -127,8 +127,9 @@ user. And move on to next step.
 
 Alternatively you can run following commands:  
 Create sql postgres instance:
+For __*SQL_INSTANCE_NAME*__ refer to 
 ```
-SQL_INSTANCE_ID=myinstance5
+SQL_INSTANCE_ID=SQL_INSTANCE_NAME
 gcloud sql instances create $SQL_INSTANCE_ID --project $PROJECT_ID \
   --database-version POSTGRES_13 --tier db-f1-micro --region $REGION
 ```  
@@ -161,8 +162,9 @@ Or run the following commands:
 
 Intialize GS_BUCKET_NAME by appending "-media" to PROJECT_ID.  
 Then create the bucket in $REGION.  
+For __*BUCKET_NAME*__ refer to resources.    
 ```
-GS_BUCKET_NAME=${PROJECT_ID}-media
+GS_BUCKET_NAME=BUCKET_NAME
 gsutil mb -l ${REGION} gs://${GS_BUCKET_NAME}
 ```
 
@@ -191,17 +193,21 @@ echo SECRET_KEY=\"$(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9' | fold -w 50 
 echo DEBUG=\"True\" >> .env
 ```
 Now we have stored configurations in file, use secret manager to create secret using this file.  
+For __*APPLICATOIN_SECRET_NAME*__ refer to resources table.  
+Go to myproject -> settings.py and on line 18 assign SETTINGS_NAME variable APPLICATION_SECRET_NAME. (default is application_settings)
 ```
-gcloud secrets create application_settings --data-file .env
-gcloud secrets versions list application_settings
+gcloud secrets create APPLICATION_SECRET_NAME --data-file .env
+gcloud secrets versions list APPLICATION_SECRET_NAME
 rm .env 
 ```
 Make sure secret has been created.  
 Now create another secret containing django user password.  
+For __*PASSWORD_SECRET_NAME*__ refer to resouces table.  
+Go to myproject -> migrations -> 0001_createsuperuser.py, go to line 12 and change 'admin_passwrod' in name variable string to PASSWORD_SECRET_NAME.  
 ```
-gcloud secrets create admin_password --replication-policy automatic
+gcloud secrets create PASSWORD_SECRET_NAME --replication-policy automatic
 USER_PASSWORD=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9' | fold -w 50 | head -n 1)
-echo -n $USER_PASSWORD | gcloud secrets versions add admin_password --data-file=-
+echo -n $USER_PASSWORD | gcloud secrets versions add PASSWORD_SECRET_NAME --data-file=-
 ```
 
 
@@ -216,17 +222,19 @@ CLOUDRUN=${PROJECTNUM}-compute@developer.gserviceaccount.com
 CLOUDBUILD=${PROJECTNUM}@cloudbuild.gserviceaccount.com
 ```
 
-Allow cloudbuild and cloudrun to access application_settings secret.  
+Allow cloudbuild and cloudrun to access __*APPLICATION_SECRET_NAME*__ secret.  
+For __*APPLICATION_SECRET_NAME*__ refer to resources table.   
 ```
-gcloud secrets add-iam-policy-binding application_settings \
+gcloud secrets add-iam-policy-binding APPLICATION_SECRET_NAME \
   --member serviceAccount:${CLOUDRUN} --role roles/secretmanager.secretAccessor
 
-gcloud secrets add-iam-policy-binding application_settings \
+gcloud secrets add-iam-policy-binding APPLICATION_SECRET_NAME \
   --member serviceAccount:${CLOUDBUILD} --role roles/secretmanager.secretAccessor
 ```
-Allow cloudbuild to access admin_password secret.  
+Allow cloudbuild to access PASSWORD_SECRET_NAME secret.  
+For __*PASSWORD_SECRET_NAME*__ refer to resources table.  
 ```
-gcloud secrets add-iam-policy-binding admin_password \
+gcloud secrets add-iam-policy-binding PASSWORD_SECRET_NAME \
   --member serviceAccount:${CLOUDBUILD} --role roles/secretmanager.secretAccessor
 ```
 
@@ -245,13 +253,14 @@ gcloud iam service-accounts add-iam-policy-binding $CLOUDRUN \
 
 
 ## 7. Run Migrations using Cloud Build  
-Submit build to create and push container image and run migrations using cloudmigrate.yaml file.  
+Submit build to create and push container image and run migrations using cloudmigrate.yaml file.
+For __*SERVICE_NAME*__ and __*IMAGE_NAME*__ refer to resources table.    
 ```
-gcloud builds submit --config cloudmigrate.yaml --substitutions _REGOIN=$REGOIN,_SQL_INSTANCE_ID=$SQL_INSTANCE_ID
+gcloud builds submit --config cloudmigrate.yaml --substitutions _REGOIN=$REGOIN,_SQL_INSTANCE_ID=$SQL_INSTANCE_ID,_IMAGE_NAME=IMAGE_NAME
 ```
 Now submit build to deploy to cloud run.
 ```
-gcloud builds submit --config cloudrundeployment.yaml --substitutions _REGOIN=$REGOIN,_SQL_INSTANCE_ID=$SQL_INSTANCE_ID
+gcloud builds submit --config cloudrundeployment.yaml --substitutions _REGOIN=$REGOIN,_SQL_INSTANCE_ID=$SQL_INSTANCE_ID,_SERVICE_NAME=SERVICE_NAME,_IMAGE_NAME=IMAGE_NAME
 ```
 
 The successfull build will return url of the service in response.
