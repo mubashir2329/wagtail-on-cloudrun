@@ -1,0 +1,17 @@
+steps:
+- name: 'gcr.io/cloud-builders/gcloud'
+  args: 
+  - 'run'
+  - 'deploy'
+  - 'wagtail-cloudrun-service'
+  - '--image'
+  - 'gcr.io/$PROJECT_ID/wagtail-cloudrun'
+  - '--region'
+  - '${_REGION}'
+  - '--platform'
+  - 'managed'
+  - '--add-cloudsql-instances'
+  - '${PROJECT_ID}:${_REGION}:${_SQL_INSTANCE_ID}'
+  - '--allow-unauthenticated'
+images:
+- gcr.io/$PROJECT_ID/wagtail-cloudrun

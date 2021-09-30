@@ -6,9 +6,9 @@ Overview:
     2. We will enable API's required (refer to table in Resources) for deployment.   
     3. We will create an sql instance, database and user.  
     4. We will create secrets using secret manager.
-    5. We will use cloud build to run migrations and deploy to cloud run.
-  <strike>6. We will create source repo and add trigger to run build on each commit</strike>
-    
+    5. We will configure iam binidings.  
+    6. We will use cloud build to run migrations and deploy to cloud run.
+  7. ~~We will create source repo and add trigger to run build on each commit~~. 
 
 ## Prerequisite  
 1. Access to GCP account with permissions to create a project with billing and to enable API's.  
