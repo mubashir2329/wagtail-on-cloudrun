@@ -10,6 +10,9 @@ gcloud secrets add-iam-policy-binding application_settings \
   --member serviceAccount:${CLOUDBUILD} --role roles/secretmanager.secretAccessor
 
 gcloud secrets add-iam-policy-binding admin_password \
+  --member serviceAccount:${CLOUDRUN} --role roles/secretmanager.secretAccessor
+
+gcloud secrets add-iam-policy-binding admin_password \
   --member serviceAccount:${CLOUDBUILD} --role roles/secretmanager.secretAccessor
 
 gcloud projects add-iam-policy-binding ${PROJECT_ID} \
