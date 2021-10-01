@@ -157,7 +157,7 @@ create a file cors.json and save following contents in this file.
     }
 ]
 ```  
-Now execute the script create_gsbucket.sh using `source ./create_gsbucket` and move on to next step  
+Now execute the script create_gsbucket.sh using `source ./create_gsbucket.sh` and move on to next step  
 Or run the following commands:  
 
 Intialize GS_BUCKET_NAME by appending "-media" to PROJECT_ID.  
