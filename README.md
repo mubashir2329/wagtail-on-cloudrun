@@ -19,15 +19,15 @@ Overview:
 
 | Resources                   	| Resource Name 	| Details 	|
 |-----------------------------	|---------	|---------	|
-| SQL Instance                	| SQL_INSTANCE_NAME        	| SQL instance and single database will be used by wagtail website <br> Intialize SQL_INSTANCE_ID variable with unique sql intance name with in project        	|
-| Storage Bucket              	| BUCKET_NAME        	| Initialize GS_BUCKET_NAME variable with recommended value "${PROJECT_ID}-media" but you can choose whichever name you want        	|
-| Google Container Image 	| IMAGE_NAME        	| Assign Image name with tag like myimage:v1 or only name like myimage to be built and pushed to repository         	|
-| Cloud Run Service                  	| SERVICE_NAME     | Assign a name to service        	|
+| SQL Instance                	| SQL_INSTANCE_NAME=myinstance1        	| SQL instance and single database will be used by wagtail website <br> Intialize SQL_INSTANCE_ID variable with unique sql intance name with in project        	|
+| Storage Bucket              	| BUCKET_NAME=${PROJECT_ID}-media        	| Initialize GS_BUCKET_NAME variable with recommended value "${PROJECT_ID}-media" but you can choose whichever name you want        	|
+| Google Container Image 	| IMAGE_NAME=wagtail-cloudrun        	| Assign Image name with tag like myimage:v1 or only name like myimage to be built and pushed to repository         	|
+| Cloud Run Service                  	| SERVICE_NAME=wagtail-cloudrun-service     | Assign a name to service        	|
 | Cloud Build                 	|         	|         	|
-| Cloud Build Service Account   | CLOUDBUILD        	| This account is automaticaly created while enabling cloud build api(see API's table) <br> default service account is PROJECT_NUMBER@cloudbuild.gserviceaccount.com      	|
-| Cloud Run Service Account     | CLOUDRUN        	| Cloud Run uses compute engine service account by default <br> default service account is PROJECT_NUMBER-compute@developer.gserviceaccount.com         	|
-| Secret                        | APPLICATION_SECRET_NAME        	| use within project unique secret name to be created and used by CLOUDBUILD and CLOUDRUN resources      	|
-| Secret                        | PASSWORD_SECRET_NAME        	| Secret created using secret manager       	|
+| Cloud Build Service Account   | CLOUDBUILD=${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com        	| This account is automaticaly created while enabling cloud build api(see API's table) <br> default service account is PROJECT_NUMBER@cloudbuild.gserviceaccount.com      	|
+| Cloud Run Service Account     | CLOUDRUN=${PROJECT_NUMBER}-compute@developer.gserviceaccount.com        	  | Cloud Run uses compute engine service account by default <br> default service account is PROJECT_NUMBER-compute@developer.gserviceaccount.com         	|
+| Secret                        | APPLICATION_SECRET_NAME=application_settings        	| use within project unique secret name to be created and used by CLOUDBUILD and CLOUDRUN resources      	|
+| Secret                        | PASSWORD_SECRET_NAME=admin_password        	| Secret created using secret manager       	|
 | roles/secretmanager.secretAccessor  |         	| on APPICATION_SECRET_NAME secret, assigned to cloud build and cloud run service accounts,<br> on PASSWORD_SECRET_NAME assigned to cloud build        	|
 | roles/cloudsql.client           |         	| required by cloud build service account        	|
 | roles/run.admin                 |         	| required by cloud build service account       	|
@@ -157,7 +157,7 @@ create a file cors.json and save following contents in this file.
     }
 ]
 ```  
-Now execute the script create_gsbucket.sh using `source ./create_bucket` and move on to next step  
+Now execute the script create_gsbucket.sh using `source ./create_gsbucket` and move on to next step  
 Or run the following commands:  
 
 Intialize GS_BUCKET_NAME by appending "-media" to PROJECT_ID.  
@@ -203,7 +203,7 @@ rm .env
 Make sure secret has been created.  
 Now create another secret containing django user password.  
 For __*PASSWORD_SECRET_NAME*__ refer to resouces table.  
-Go to myproject -> migrations -> 0001_createsuperuser.py, go to line 12 and change 'admin_passwrod' in name variable string to PASSWORD_SECRET_NAME.  
+Go to myproject -> migrations -> 0001_createsuperuser.py, go to line 12 and change 'admin_password' in name variable string to PASSWORD_SECRET_NAME.  
 ```
 gcloud secrets create PASSWORD_SECRET_NAME --replication-policy automatic
 USER_PASSWORD=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9' | fold -w 50 | head -n 1)
