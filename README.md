@@ -1,5 +1,5 @@
 # Wagtail Deployment On Cloud Run  
-In this project we will creata a simple wagtail application and deploy it on cloud run using cloud build.  
+In this project we will create a simple wagtail application and deploy it on cloud run using cloud build.  
 Overview: 
 
     1. We will create (or/and configure) project and region to use.   
@@ -10,6 +10,7 @@ Overview:
     6. We will use cloud build to run migrations and deploy to cloud run.
   7. ~~We will create source repo and add trigger to run build on each commit~~. 
 
+Clone this repository and change working directory to this repo.  
 ## Prerequisite  
 1. Access to GCP account with permissions to create a project with billing and to enable API's.  
 2. CloudSDK set up on local machine or use cloud shell.  
