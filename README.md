@@ -256,11 +256,11 @@ gcloud iam service-accounts add-iam-policy-binding $CLOUDRUN \
 Submit build to create and push container image and run migrations using cloudmigrate.yaml file.
 For __*SERVICE_NAME*__ and __*IMAGE_NAME*__ refer to resources table.    
 ```
-gcloud builds submit --config cloudmigrate.yaml --substitutions _REGOIN=$REGOIN,_SQL_INSTANCE_ID=$SQL_INSTANCE_ID,_IMAGE_NAME=IMAGE_NAME
+gcloud builds submit --config cloudmigrate.yaml --substitutions REGION=$REGION,_SQL_INSTANCE_ID=$SQL_INSTANCE_ID,_IMAGE_NAME=IMAGE_NAME
 ```
 Now submit build to deploy to cloud run.
 ```
-gcloud builds submit --config cloudrundeployment.yaml --substitutions _REGOIN=$REGOIN,_SQL_INSTANCE_ID=$SQL_INSTANCE_ID,_SERVICE_NAME=SERVICE_NAME,_IMAGE_NAME=IMAGE_NAME
+gcloud builds submit --config cloudrundeployment.yaml --substitutions REGION=$REGION,_SQL_INSTANCE_ID=$SQL_INSTANCE_ID,_SERVICE_NAME=SERVICE_NAME,_IMAGE_NAME=IMAGE_NAME
 ```
 
 The successfull build will return url of the service in response.
