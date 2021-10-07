@@ -13,4 +13,5 @@ gcloud secrets create admin_password --replication-policy automatic
 USER_PASSWORD=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9' | fold -w 50 | head -n 1)
 echo -n $USER_PASSWORD | gcloud secrets versions add admin_password --data-file=-
 
+
 rm .env 
